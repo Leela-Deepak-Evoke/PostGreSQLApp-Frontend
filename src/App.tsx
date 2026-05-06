@@ -7,7 +7,7 @@ import Navbar from "./components/Navbar";
 import TableView from "./components/TableView";
 import type { User } from "./models/User";
 
-const API_URL = "http://localhost:3030/api/clients";
+const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 // ---------------- API METHODS ----------------
 
