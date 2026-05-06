@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -7,6 +6,7 @@ import Navbar from "./components/Navbar";
 import TableView from "./components/TableView";
 import type { User } from "./models/User";
 
+// ✅ Load from .env file
 const API_URL = import.meta.env.VITE_BACKEND_URL;
 
 // ---------------- API METHODS ----------------
@@ -40,22 +40,15 @@ function App() {
   const [searchTerm, setSearchTerm] = useState("");
   const queryClient = useQueryClient();
 
-  // ---------------- FETCH USERS ----------------
   const { data: users = [], isLoading, isError } = useQuery({
     queryKey: ["users"],
     queryFn: fetchUsers,
-
-    // cache for 5 mins
     staleTime: 1000 * 60 * 5,
-
-    // keep in memory 10 mins
     gcTime: 1000 * 60 * 10,
-
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
   });
 
-  // ---------------- CREATE ----------------
   const createMutation = useMutation({
     mutationFn: createUser,
     onSuccess: () => {
@@ -63,7 +56,6 @@ function App() {
     },
   });
 
-  // ---------------- UPDATE ----------------
   const updateMutation = useMutation({
     mutationFn: updateUser,
     onSuccess: () => {
@@ -71,15 +63,12 @@ function App() {
     },
   });
 
-  // ---------------- DELETE ----------------
   const deleteMutation = useMutation({
     mutationFn: deleteUser,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
     },
   });
-
-  // ------------------------------------------------
 
   const handleCreate = () => {
     window.dispatchEvent(new CustomEvent("open-modal", { detail: null }));
@@ -107,12 +96,13 @@ function App() {
     }
   };
 
-  // Search Filter
-  const filteredUsers = users.filter((u: User) =>
-    `${u.name} ${u.email} ${u.job}`
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
-  );
+  const filteredUsers = Array.isArray(users)
+    ? users.filter((u: User) =>
+        `${u.name} ${u.email} ${u.job}`
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase())
+      )
+    : [];
 
   if (isLoading) return <h2>Loading users...</h2>;
   if (isError) return <h2>Failed to load users</h2>;
